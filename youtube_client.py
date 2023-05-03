@@ -4,8 +4,11 @@ from google.auth.transport.requests import Request
 from typing import List
 import os
 import pickle
-
+from util import get_random_time_interval_to_sleep
+import time
 from classes.playlist import Playlist
+
+# TODO: add a logger that prints the status to terminal
 
 
 class YouTubeClient:
@@ -16,7 +19,7 @@ class YouTubeClient:
         os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
         api_service_name = "youtube"
         api_version = "v3"
-        client_secrets_file = "client_secret_youtube.json"
+        youtube_credentials = "secrets/client_secret_youtube.json"
         credentials = None
         if os.path.exists("token.pickle"):
             with open("token.pickle", "rb") as token:
@@ -26,7 +29,7 @@ class YouTubeClient:
                 credentials.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
-                    client_secrets_file, self.SCOPES)
+                    youtube_credentials, self.SCOPES)
                 credentials = flow.run_local_server(port=0)
             with open("token.pickle", "wb") as token:
                 pickle.dump(credentials, token)
@@ -44,7 +47,7 @@ class YouTubeClient:
                                                  maxResults=25,
                                                  mine=True).execute()
         results = response['items']
-        return List(map(lambda v: Playlist(id=v["id"], name=v["localized"]["title"], total_tracks=v["contentDetails"]["itemCount"]), results))
+        return list(map(lambda v: Playlist(id=v["id"], name=v["snippet"]["title"], total_tracks=v["contentDetails"]["itemCount"]), results))
 
     def create_new_playlist(self, playlist_name: str):
         return self.youtube.playlists().insert(
@@ -68,11 +71,12 @@ class YouTubeClient:
         )
         response = request.execute()
         videos = response["items"]
-        return List(map(lambda v: v["contentDetails"]["videoId"], videos))
+        return list(map(lambda v: v["contentDetails"]["videoId"], videos))
 
     # this is not idempotent
-
+    #  Added a random timer to avoid spamming and 409s
     def add_video_to_playlist(self, playlist_id: str, video_id: str):
+        time.sleep(get_random_time_interval_to_sleep())
         return self.youtube.playlistItems().insert(
             part="snippet",
             body={
@@ -88,9 +92,9 @@ class YouTubeClient:
         ).execute()
 
     def get_all_playlist_info(self, playlists: List[dict]) -> List[Playlist]:
-        return List(map(lambda v: Playlist(id=v["id"], name=v["localized"]["title"], total_tracks=v["contentDetails"]["itemCount"]), playlists))
+        return list(map(lambda v: Playlist(id=v["id"], name=v["localized"]["title"], total_tracks=v["contentDetails"]["itemCount"]), playlists))
 
-    def search_name_on_youtube_and_get_video_id(self, query: str):
+    def search_name_on_youtube_and_get_video_id(self, query: str) -> str:
         request = self.youtube.search().list(
             part="snippet",
             maxResults=3,
@@ -98,13 +102,12 @@ class YouTubeClient:
         )
         response = request.execute()
         results = response["items"]
-        filtered_results = filter(
-            lambda v: v["id"]["kind"] == "youtube#video", results)
+        filtered_results = [v for v in results if v["id"]
+                            ["kind"] == "youtube#video"]
         return filtered_results[0]["id"]["videoId"]
 
     def is_playlist_in_youtube(self, playlist_name: str):
-        all_playlists: List[Playlist] = self.get_all_playlists_of_user(
-            youtube=self.youtube)
+        all_playlists: List[Playlist] = self.get_all_playlists_of_user()
         for playlist in all_playlists:
             if playlist_name == playlist.name:
                 return True

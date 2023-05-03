@@ -4,3 +4,6 @@ playlists_info.json
 token.pickle
 client_secret_youtube.json
 client_secrets_spotify.json
+secrets/client_secret_spotify.json
+__pycache__/youtube_client.cpython-311.pyc
+classes/__pycache__/track.cpython-311.pyc
