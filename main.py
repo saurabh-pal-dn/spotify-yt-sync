@@ -7,12 +7,10 @@ import json
 import sys
 import logging
 
-
-SPOTIFY_BASE_URL = 'https://api.spotify.com/v1/'
-
+logging.basicConfig(level=logging.INFO)
 spotify_credentials = json.load(open('secrets/client_secret_spotify.json'))
 youtube_client = YouTubeClient()
-logging.basicConfig(level=logging.INFO)
+SPOTIFY_BASE_URL = 'https://api.spotify.com/v1/'
 
 
 def get_access_token():

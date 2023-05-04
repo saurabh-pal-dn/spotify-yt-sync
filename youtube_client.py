@@ -8,6 +8,8 @@ from util import get_random_time_interval_to_sleep
 import time
 from classes.playlist import Playlist
 import logging
+
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -77,19 +79,25 @@ class YouTubeClient:
         time.sleep(get_random_time_interval_to_sleep())
         logging.info(
             f'Adding video id: {video_id} to YT playlist id: {playlist_id}')
-        return self.youtube.playlistItems().insert(
-            part="snippet",
-            body={
-                "snippet": {
-                    "playlistId": playlist_id,
-                    "position": 0,
-                    "resourceId": {
-                        "kind": "youtube#video",
-                        "videoId": video_id
+        try:
+            self.youtube.playlistItems().insert(
+                part="snippet",
+                body={
+                    "snippet": {
+                        "playlistId": playlist_id,
+                        "position": 0,
+                        "resourceId": {
+                            "kind": "youtube#video",
+                            "videoId": video_id
+                        }
                     }
                 }
-            }
-        ).execute()
+            ).execute()
+            logging.info(
+                f'Successfully added video id: {video_id} to YT playlist id: {playlist_id}')
+        except Exception as e:
+            logging.error(
+                f'Failed to add video id: {video_id} to YT playlist id: {playlist_id}, due to {e}')
 
     def get_all_playlist_info(self, playlists: List[dict]) -> List[Playlist]:
         return list(map(lambda v: Playlist(id=v["id"], name=v["localized"]["title"], total_tracks=v["contentDetails"]["itemCount"]), playlists))
