@@ -99,9 +99,6 @@ class YouTubeClient:
             logging.error(
                 f'Failed to add video id: {video_id} to YT playlist id: {playlist_id}, due to {e}')
 
-    def get_all_playlist_info(self, playlists: List[dict]) -> List[Playlist]:
-        return list(map(lambda v: Playlist(id=v["id"], name=v["localized"]["title"], total_tracks=v["contentDetails"]["itemCount"]), playlists))
-
     def search_name_on_youtube_and_get_video_id(self, query: str) -> str:
         logging.info(f'Searching YT for query: {query}')
         request = self.youtube.search().list(

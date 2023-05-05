@@ -5,3 +5,4 @@ token.pickle
 __pycache__/youtube_client.cpython-311.pyc
 classes/__pycache__/track.cpython-311.pyc
 __pycache__/util.cpython-311.pyc
+.vscode/settings.json
