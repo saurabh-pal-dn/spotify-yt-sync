@@ -24,3 +24,5 @@ $ python3 main.py -n
 ## Motivation
 
 Spotify provides a great place to listen & explore music but I don't pay for it. I use a cracked version of YT to listen to songs while working. The need to sync music from Spotify to YT arises; this script does that work for me.
+
+I used `CHAT-GPT` to help me write the APIs, sanitize the json response and write a small util function. I was able to complete this code in ~5 hours, given I was also working on the side.
